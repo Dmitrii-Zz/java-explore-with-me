@@ -42,18 +42,18 @@ public class HitService {
             throw new ValidatedDataTimeException("Некорректные даты в запросе.");
         }
         if (uris.isEmpty() && !unique) {
-            return new ResponseEntity<>(storage.getStatsAllUrisAndNotUniqueIp(start, end), HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(storage.getStatsAllUrisAndNotUniqueIp(start, end), HttpStatus.OK);
         }
 
         if (uris.isEmpty() && unique) {
-            return new ResponseEntity<>(storage.getStatsAllUrisAndUniqueIp(start, end), HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(storage.getStatsAllUrisAndUniqueIp(start, end), HttpStatus.OK);
         }
 
         if (!unique) {
-            return new ResponseEntity<>(storage.getStatsUrisAndNotUniqueIp(start, end, uris), HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(storage.getStatsUrisAndNotUniqueIp(start, end, uris), HttpStatus.OK);
         }
 
-        return new ResponseEntity<>(storage.getStatsUrisAndUniqueIp(start, end, uris), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(storage.getStatsUrisAndUniqueIp(start, end, uris), HttpStatus.OK);
     }
 
     private LocalDateTime parseDataTime(String value) {
