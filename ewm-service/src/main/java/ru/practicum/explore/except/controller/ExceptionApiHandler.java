@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.explore.except.ex.CategoryNotFountException;
+import ru.practicum.explore.except.ex.UserNotFountException;
 import ru.practicum.explore.except.model.ApiError;
 
 import java.time.LocalDateTime;
@@ -30,9 +31,9 @@ public class ExceptionApiHandler {
                 .build();
     }
 
-    @ExceptionHandler
+    @ExceptionHandler({UserNotFountException.class, CategoryNotFountException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ApiError handleCategoryNotFountException(final CategoryNotFountException e) {
+    public ApiError handleNotFountException(final Exception e) {
         log.debug("Произошла ошибка {}", e.getMessage());
         return ApiError.builder()
                 .message(e.getMessage())

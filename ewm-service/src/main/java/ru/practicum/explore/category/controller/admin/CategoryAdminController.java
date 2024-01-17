@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore.category.dto.CategoryDto;
 import ru.practicum.explore.category.service.CategoryService;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 
 @Slf4j
@@ -37,10 +36,5 @@ public class CategoryAdminController {
                                                  @RequestBody CategoryDto categoryDto) {
         log.info("Запрос на обновление категории id = {}, name = {}", catId, categoryDto.getName());
         return categoryService.updateCategory(catId, categoryDto);
-    }
-
-    @GetMapping
-    public ResponseEntity<Object> getAll() {
-        return categoryService.getAll();
     }
 }
