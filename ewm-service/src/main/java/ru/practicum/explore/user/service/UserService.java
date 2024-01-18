@@ -14,6 +14,7 @@ import ru.practicum.explore.user.repository.UserRepository;
 import ru.practicum.explore.utils.Page;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,13 +38,18 @@ public class UserService {
     }
 
     public ResponseEntity<Object> deleteUser(long id) {
+        checkExistsUser(id);
+        userStorage.deleteById(id);
+        return new ResponseEntity<>("Пользователь удален", HttpStatus.NO_CONTENT);
+    }
 
-        if (userStorage.findById(id).isEmpty()) {
+    public User checkExistsUser(long id) {
+        Optional<User> optionalUser = userStorage.findById(id);
+
+        if (optionalUser.isEmpty()) {
             throw new UserNotFountException("Пользователь не найден или недоступен");
         }
 
-        userStorage.deleteById(id);
-
-        return new ResponseEntity<>("Пользователь удален", HttpStatus.NO_CONTENT);
+        return optionalUser.get();
     }
 }

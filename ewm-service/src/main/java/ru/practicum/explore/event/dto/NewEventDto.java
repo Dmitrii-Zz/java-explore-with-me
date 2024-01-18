@@ -1,13 +1,20 @@
 package ru.practicum.explore.event.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.*;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class NewEventDto {
     @NotNull
     @Size(min = 20, max = 2000, message = "Длина аннотации должна быть в диапазоне 20-2000.")
@@ -25,8 +32,9 @@ public class NewEventDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
 
+    @Valid
     @NotNull
-    private LocationDto locationDto;
+    private LocationDto location;
 
     private boolean paid;
 

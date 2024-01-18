@@ -30,13 +30,13 @@ public class EventsPrivateController {
                                             @RequestParam(defaultValue = "10") @Positive int size) {
         log.info("Запрос событий юзера id = {}, параметры from = {}, size = {}", userId, from, size);
         return new ResponseEntity<>(newEventDto, HttpStatus.OK);
-        //return eventService.getEvent(userId, from, size);
     }
 
     @PostMapping
-    public ResponseEntity<Object> createEvent(@PathVariable int userId,
+    public ResponseEntity<Object> createEvent(@PathVariable @Positive int userId,
                                               @RequestBody NewEventDto newEventDto) {
-        return null;
+        log.info("Запрос на создание события от юзера id = {}", userId);
+        return eventService.createEvent(userId, newEventDto);
     }
 
     @GetMapping("/{eventId}")

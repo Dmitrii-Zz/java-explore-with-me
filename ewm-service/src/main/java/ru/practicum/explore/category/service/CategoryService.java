@@ -30,13 +30,8 @@ public class CategoryService {
     }
 
     public ResponseEntity<Object> deleteCategory(int catId) {
-
-        if (categoryStorage.findById(catId).isEmpty()) {
-            throw new CategoryNotFountException("Категория не найдена или недоступна");
-        }
-
+        checkExistCategory(catId);
         categoryStorage.deleteById(catId);
-
         return new ResponseEntity<>("Категория удалена", HttpStatus.NO_CONTENT);
     }
 
@@ -49,21 +44,25 @@ public class CategoryService {
 
     public ResponseEntity<Object> getAll(int from, int size) {
         PageRequest page = Page.createPageRequest(from, size);
-        List<CategoryDto> categories = categoryStorage.getAllCategory(page).stream()
+        List<CategoryDto> categories = categoryStorage.findAll(page).stream()
                 .map(CategoryMapper::toCategoryDto)
                 .collect(Collectors.toList());
         return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 
     public ResponseEntity<Object> getCategoryById(int catId) {
+        Category category = checkExistCategory(catId);
+        CategoryDto categoryDto = CategoryMapper.toCategoryDto(category);
+        return new ResponseEntity<>(categoryDto, HttpStatus.OK);
+    }
+
+    public Category checkExistCategory(int catId) {
         Optional<Category> optionalCategory = categoryStorage.findById(catId);
 
         if (optionalCategory.isEmpty()) {
             throw new CategoryNotFountException("Категория не найдена или недоступна");
         }
 
-        CategoryDto categoryDto = CategoryMapper.toCategoryDto(optionalCategory.get());
-
-        return new ResponseEntity<>(categoryDto, HttpStatus.OK);
+        return optionalCategory.get();
     }
 }
