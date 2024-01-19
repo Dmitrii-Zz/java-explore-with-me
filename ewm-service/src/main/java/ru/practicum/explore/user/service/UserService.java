@@ -25,9 +25,18 @@ public class UserService {
 
     public ResponseEntity<Object> getUsers(List<Long> ids, int from, int size) {
         PageRequest page = Page.createPageRequest(from, size);
-        List<UserDto> users = userStorage.findByIdIn(ids, page).stream()
-                .map(UserMapper::toUserDto)
-                .collect(Collectors.toList());
+        List<UserDto> users;
+
+        if (ids.isEmpty()) {
+            users = userStorage.findAll(page).stream()
+                    .map(UserMapper::toUserDto)
+                    .collect(Collectors.toList());
+        } else {
+            users = userStorage.findByIdIn(ids, page).stream()
+                    .map(UserMapper::toUserDto)
+                    .collect(Collectors.toList());
+        }
+
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 

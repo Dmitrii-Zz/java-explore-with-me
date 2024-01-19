@@ -17,6 +17,6 @@ public class LocationDto {
     private float lat;
 
     @Min(-180)
-    @Min(180)
+    @Max(180)
     private float lon;
 }

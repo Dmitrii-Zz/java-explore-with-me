@@ -1,4 +1,12 @@
 package ru.practicum.explore.event.dto;
 
-public class UpdateEventUserRequest {
+import lombok.*;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class UpdateEventUserRequest extends NewEventDto {
+
+    private String stateAction;
 }

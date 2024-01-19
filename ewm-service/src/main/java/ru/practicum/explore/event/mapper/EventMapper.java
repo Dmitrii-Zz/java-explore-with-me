@@ -2,6 +2,7 @@ package ru.practicum.explore.event.mapper;
 
 import ru.practicum.explore.category.mapper.CategoryMapper;
 import ru.practicum.explore.event.dto.EventFullDto;
+import ru.practicum.explore.event.dto.EventShortDto;
 import ru.practicum.explore.event.dto.NewEventDto;
 import ru.practicum.explore.event.model.Event;
 import ru.practicum.explore.user.mapper.UserMapper;
@@ -17,9 +18,9 @@ public class EventMapper {
                 .annotation(newEventDto.getAnnotation())
                 .description(newEventDto.getDescription())
                 .eventDate(newEventDto.getEventDate())
-                .paid(newEventDto.isPaid())
+                .paid(newEventDto.getPaid())
                 .participantLimit(newEventDto.getParticipantLimit())
-                .requestModeration(newEventDto.isRequestModeration())
+                .requestModeration(newEventDto.getRequestModeration())
                 .title(newEventDto.getTitle())
                 .build();
     }
@@ -41,6 +42,20 @@ public class EventMapper {
                 .requestModeration(event.isRequestModeration())
                 .title(event.getTitle())
                 .state(event.getState())
+                .views(event.getViews())
+                .build();
+    }
+
+    public static EventShortDto toEventShortDto(Event event) {
+        return EventShortDto.builder()
+                .id(event.getId())
+                .annotation(event.getAnnotation())
+                .category(CategoryMapper.toCategoryDto(event.getCategory()))
+                .eventDate(event.getEventDate().format(FORMATTER))
+                .paid(event.isPaid())
+                .confirmedRequests(event.getConfirmedRequests())
+                .initiator(UserMapper.toUserShortDto(event.getInitiator()))
+                .title(event.getTitle())
                 .views(event.getViews())
                 .build();
     }

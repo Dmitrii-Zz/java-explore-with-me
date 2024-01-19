@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NewEventDto {
+
     @NotNull
     @Size(min = 20, max = 2000, message = "Длина аннотации должна быть в диапазоне 20-2000.")
     private String annotation;
@@ -36,12 +37,12 @@ public class NewEventDto {
     @NotNull
     private LocationDto location;
 
-    private boolean paid;
+    private Boolean paid;
 
     @PositiveOrZero
-    private int participantLimit;
+    private Integer participantLimit;
 
-    private boolean requestModeration;
+    private Boolean requestModeration;
 
     @NotNull
     @Size(min = 3, max = 120, message = "Длина аннотации должна быть в диапазоне 3-120.")
