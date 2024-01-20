@@ -1,6 +1,7 @@
 package ru.practicum.explore.event.dto;
 
 import lombok.*;
+import ru.practicum.explore.event.model.StateAction;
 
 @Getter
 @Setter
@@ -8,5 +9,5 @@ import lombok.*;
 @NoArgsConstructor
 public class UpdateEventUserRequest extends NewEventDto {
 
-    private String stateAction;
+    private StateAction stateAction;
 }

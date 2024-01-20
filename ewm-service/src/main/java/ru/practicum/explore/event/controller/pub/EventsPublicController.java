@@ -1,16 +1,21 @@
 package ru.practicum.explore.event.controller.pub;
 
 import lombok.Builder;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.explore.event.service.EventService;
 
 import java.util.List;
 
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/events")
 public class EventsPublicController {
+
+    private final EventService eventService;
 
     @GetMapping
     public ResponseEntity<Object> getEvents(@RequestParam String text,
@@ -27,6 +32,6 @@ public class EventsPublicController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> getEventById(@PathVariable int id) {
-        return null;
+        return eventService.getEvent(id);
     }
 }

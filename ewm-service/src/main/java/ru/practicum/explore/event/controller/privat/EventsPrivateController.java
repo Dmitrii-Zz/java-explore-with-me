@@ -42,6 +42,7 @@ public class EventsPrivateController {
     @GetMapping("/{eventId}")
     public ResponseEntity<Object> getEventById(@PathVariable long userId,
                                                @PathVariable long eventId) {
+        log.info("Запрос события id = {} юзера id = {}", eventId, userId);
         return eventService.getEventById(userId, eventId);
     }
 
@@ -49,7 +50,8 @@ public class EventsPrivateController {
     public ResponseEntity<Object> updateEvent(@PathVariable @Positive long userId,
                                               @PathVariable @Positive  long eventId,
                                               @RequestBody @Valid UpdateEventUserRequest updateEventUserRequest) {
-        return eventService.updateEvent(userId, eventId, updateEventUserRequest);
+        log.info("Обновление события id = {} юзером id = {}", eventId, userId);
+        return eventService.updateEventUser(userId, eventId, updateEventUserRequest);
     }
 
     @GetMapping("/{eventId}/requests")

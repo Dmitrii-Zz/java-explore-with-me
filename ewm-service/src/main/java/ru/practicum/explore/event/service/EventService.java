@@ -1,37 +1,41 @@
 package ru.practicum.explore.event.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import ru.practicum.explore.category.mapper.CategoryMapper;
 import ru.practicum.explore.category.model.Category;
 import ru.practicum.explore.category.service.CategoryService;
-import ru.practicum.explore.event.dto.EventFullDto;
-import ru.practicum.explore.event.dto.EventShortDto;
-import ru.practicum.explore.event.dto.NewEventDto;
-import ru.practicum.explore.event.dto.UpdateEventUserRequest;
+import ru.practicum.explore.event.dto.*;
 import ru.practicum.explore.event.mapper.EventMapper;
 import ru.practicum.explore.event.mapper.LocationMapper;
 import ru.practicum.explore.event.model.Event;
 import ru.practicum.explore.event.model.Location;
+import ru.practicum.explore.event.model.StateAction;
 import ru.practicum.explore.event.model.StateEvent;
 import ru.practicum.explore.event.repository.EventRepository;
 import ru.practicum.explore.except.ex.EventIncorectException;
 import ru.practicum.explore.except.ex.EventNotFountException;
+import ru.practicum.explore.except.ex.EventPublishedException;
+import ru.practicum.explore.except.ex.LocalDataTimeParseException;
 import ru.practicum.explore.user.model.User;
 import ru.practicum.explore.user.service.UserService;
 import ru.practicum.explore.utils.Page;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EventService {
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final EventRepository eventStorage;
     private final UserService userService;
     private final CategoryService categoryService;
@@ -53,7 +57,7 @@ public class EventService {
         event.setCategory(category);
         event.setLocation(location);
         event.setCreatedOn(LocalDateTime.now());
-        event.setState(StateEvent.PUBLISHED);
+        event.setState(StateEvent.PENDING);
 
         EventFullDto eventFullDto = EventMapper.toEventFullDto(eventStorage.save(event));
         return new ResponseEntity<>(eventFullDto, HttpStatus.CREATED);
@@ -89,7 +93,7 @@ public class EventService {
         return optionalEvent.get();
     }
 
-    public ResponseEntity<Object> updateEvent(long userId, long eventId,
+    public ResponseEntity<Object> updateEventUser(long userId, long eventId,
                                               UpdateEventUserRequest updateEventUserRequest) {
         userService.checkExistsUser(userId);
 
@@ -97,6 +101,10 @@ public class EventService {
 
         if (event.getInitiator().getId() != userId) {
             throw new EventNotFountException("Event with id= " + eventId + " was not found");
+        }
+
+        if (event.getState().equals(StateEvent.PUBLISHED)) {
+            throw new EventPublishedException("Only pending or canceled events can be changed.");
         }
 
         if (updateEventUserRequest.getAnnotation() != null) {
@@ -112,12 +120,13 @@ public class EventService {
             event.setDescription(updateEventUserRequest.getDescription());
         }
 
-        if (updateEventUserRequest.getEventDate() != null &&
-                !event.getEventDate().isAfter(LocalDateTime.now().plusHours(2))) {
-            throw new EventIncorectException("Field: eventDate. Error: должно содержать дату, " +
-                    "которая еще не наступила. Value:");
-        } else {
-            event.setEventDate(updateEventUserRequest.getEventDate());
+        if (updateEventUserRequest.getEventDate() != null) {
+            if (updateEventUserRequest.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+                throw new EventIncorectException("Field: eventDate. Error: должно содержать дату, " +
+                        "которая еще не наступила. Value:");
+            } else {
+                event.setEventDate(updateEventUserRequest.getEventDate());
+            }
         }
 
         if (updateEventUserRequest.getLocation() != null) {
@@ -141,7 +150,121 @@ public class EventService {
             event.setTitle(updateEventUserRequest.getTitle());
         }
 
-        return null;
+        if (updateEventUserRequest.getStateAction() != null &&
+                updateEventUserRequest.getStateAction().equals(StateAction.CANCEL_REVIEW)) {
+            event.setState(StateEvent.CANCELED);
+        } else if (updateEventUserRequest.getStateAction() != null &&
+                updateEventUserRequest.getStateAction().equals(StateAction.SEND_TO_REVIEW)) {
+            event.setState(StateEvent.PENDING);
+        }
 
+        Event eventUpdate = eventStorage.save(event);
+        return new ResponseEntity<>(EventMapper.toEventFullDto(eventUpdate), HttpStatus.OK);
+    }
+
+    public ResponseEntity<Object> searchEvents(List<Long> users,
+                                               List<StateEvent> states,
+                                               List<Long> idsCategory,
+                                               String rangeStart,
+                                               String rangeEnd,
+                                               int from,
+                                               int size) {
+        PageRequest page = Page.createPageRequest(from, size);
+
+        return null; //TODO Сделать запрос к БД
+    }
+
+    public ResponseEntity<Object> updateEventAdmin(int eventId, UpdateEventAdminRequest updateEventAdminRequest) {
+        Event event = checkExistsEvent(eventId);
+
+        if (event.getState().equals(StateEvent.PUBLISHED)) {
+            throw new EventPublishedException("Only pending or canceled events can be changed.");
+        }
+
+        if (updateEventAdminRequest.getAnnotation() != null) {
+            event.setAnnotation(updateEventAdminRequest.getAnnotation());
+        }
+
+        if (updateEventAdminRequest.getCategory() != null) {
+            Category category = categoryService.checkExistCategory(updateEventAdminRequest.getCategory());
+            event.setCategory(category);
+        }
+
+        if (updateEventAdminRequest.getDescription() != null) {
+            event.setDescription(updateEventAdminRequest.getDescription());
+        }
+
+        if (updateEventAdminRequest.getEventDate() != null) {
+            if (updateEventAdminRequest.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+                throw new EventIncorectException("Field: eventDate. Error: должно содержать дату, " +
+                        "которая еще не наступила. Value:");
+            } else {
+                event.setEventDate(updateEventAdminRequest.getEventDate());
+            }
+        }
+
+        if (updateEventAdminRequest.getLocation() != null) {
+            Location location = locationService.createLocation(
+                    LocationMapper.toLocation(updateEventAdminRequest.getLocation()));
+        }
+
+        if (updateEventAdminRequest.getPaid() != null) {
+            event.setPaid(updateEventAdminRequest.getPaid());
+        }
+
+        if (updateEventAdminRequest.getParticipantLimit() != null) {
+            event.setParticipantLimit(updateEventAdminRequest.getParticipantLimit());
+        }
+
+        if (updateEventAdminRequest.getRequestModeration() != null) {
+            event.setRequestModeration(updateEventAdminRequest.getRequestModeration());
+        }
+
+        if (updateEventAdminRequest.getTitle() != null) {
+            event.setTitle(updateEventAdminRequest.getTitle());
+        }
+
+        if (updateEventAdminRequest.getStateAction() != null &&
+                updateEventAdminRequest.getStateAction().equals(StateAction.PUBLISH_EVENT)) {
+            event.setState(StateEvent.PUBLISHED);
+            event.setPublishedOn(LocalDateTime.now());
+        } else if (updateEventAdminRequest.getStateAction() != null &&
+                updateEventAdminRequest.getStateAction().equals(StateAction.REJECT_EVENT)) {
+            event.setState(StateEvent.CANCELED);
+        }
+
+        Event eventUpdate = eventStorage.save(event);
+        return new ResponseEntity<>(EventMapper.toEventFullDto(eventUpdate), HttpStatus.OK);
+    }
+
+    public ResponseEntity<Object> getEvent(int eventId) {
+        Event event = checkExistsEvent(eventId);
+
+        if (event.getState().equals(StateEvent.PUBLISHED)) {
+            //TODO сервис статистики
+            return new ResponseEntity<>(EventMapper.toEventFullDto(event), HttpStatus.OK);
+        }
+
+        throw new EventNotFountException("Event with id= " + eventId + " was not found");
+    }
+
+    public void changeConfirmedRequests(long eventId, boolean increment) {
+        Event event = checkExistsEvent(eventId);
+
+        if (increment) {
+            event.setConfirmedRequests(event.getConfirmedRequests() + 1);
+        } else {
+            event.setConfirmedRequests(event.getConfirmedRequests() - 1);
+        }
+
+        eventStorage.save(event);
+    }
+
+    private LocalDateTime parseDataTime(String value) {
+        try {
+            return LocalDateTime.parse(value, FORMATTER);
+        } catch (DateTimeParseException e) {
+            throw new LocalDataTimeParseException("Дата должна быть в формате yyyy-MM-dd HH:mm:ss");
+        }
     }
 }
