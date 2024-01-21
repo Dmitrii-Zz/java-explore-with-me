@@ -1,19 +1,20 @@
 package ru.practicum.explore.compilation.dto;
 
+import com.sun.istack.Nullable;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.Set;
+import java.util.List;
 
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class NewCompilationDto {
+public class UpdateCompilationRequest {
 
-    private Set<Long> events;
+    private List<Long> events;
 
     private boolean pinned;
 
