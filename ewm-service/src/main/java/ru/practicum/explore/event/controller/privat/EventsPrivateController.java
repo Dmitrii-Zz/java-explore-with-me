@@ -2,11 +2,9 @@ package ru.practicum.explore.event.controller.privat;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.explore.event.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.explore.event.dto.NewEventDto;
 import ru.practicum.explore.event.dto.UpdateEventUserRequest;
 import ru.practicum.explore.event.service.EventService;
@@ -29,7 +27,7 @@ public class EventsPrivateController {
                                             @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                             @RequestParam(defaultValue = "10") @Positive int size) {
         log.info("Запрос событий юзера id = {}, параметры from = {}, size = {}", userId, from, size);
-        return eventService.getEvents(userId, from, size);
+        return eventService.getEventsUser(userId, from, size);
     }
 
     @PostMapping
@@ -54,17 +52,5 @@ public class EventsPrivateController {
         return eventService.updateEventUser(userId, eventId, updateEventUserRequest);
     }
 
-    @GetMapping("/{eventId}/requests")
-    public ResponseEntity<Object> getRequests(@PathVariable int userId,
-                                              @PathVariable int eventId) {
-        return null;
-    }
 
-    @PatchMapping("/{eventId}/requests")
-    public ResponseEntity<Object> updateStatusRequests(
-                        @PathVariable int userId,
-                        @PathVariable int eventId,
-                        @RequestBody EventRequestStatusUpdateRequest eventRequestStatusUpdateRequest) {
-        return null;
-    }
 }

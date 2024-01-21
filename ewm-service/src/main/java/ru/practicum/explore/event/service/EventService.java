@@ -11,10 +11,7 @@ import ru.practicum.explore.category.service.CategoryService;
 import ru.practicum.explore.event.dto.*;
 import ru.practicum.explore.event.mapper.EventMapper;
 import ru.practicum.explore.event.mapper.LocationMapper;
-import ru.practicum.explore.event.model.Event;
-import ru.practicum.explore.event.model.Location;
-import ru.practicum.explore.event.model.StateAction;
-import ru.practicum.explore.event.model.StateEvent;
+import ru.practicum.explore.event.model.*;
 import ru.practicum.explore.event.repository.EventRepository;
 import ru.practicum.explore.except.ex.EventIncorectException;
 import ru.practicum.explore.except.ex.EventNotFountException;
@@ -27,6 +24,7 @@ import ru.practicum.explore.utils.Page;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -63,7 +61,7 @@ public class EventService {
         return new ResponseEntity<>(eventFullDto, HttpStatus.CREATED);
     }
 
-    public ResponseEntity<Object> getEvents(int userId, int from, int size) {
+    public ResponseEntity<Object> getEventsUser(int userId, int from, int size) {
         userService.checkExistsUser(userId);
         PageRequest page = Page.createPageRequest(from, size);
         List<EventShortDto> events = eventStorage.findAllByInitiatorId(userId, page).stream()
@@ -162,16 +160,27 @@ public class EventService {
         return new ResponseEntity<>(EventMapper.toEventFullDto(eventUpdate), HttpStatus.OK);
     }
 
-    public ResponseEntity<Object> searchEvents(List<Long> users,
-                                               List<StateEvent> states,
-                                               List<Long> idsCategory,
-                                               String rangeStart,
-                                               String rangeEnd,
-                                               int from,
-                                               int size) {
-        PageRequest page = Page.createPageRequest(from, size);
+    public ResponseEntity<Object> adminSearchEvents(List<Long> users, List<StateEvent> states, List<Long> idsCategory,
+                   String rangeStart, String rangeEnd, int from, int size) {
 
-        return null; //TODO Сделать запрос к БД
+        PageRequest page = Page.createPageRequest(from, size);
+        LocalDateTime start = null;
+        LocalDateTime end = null;
+
+        if (rangeStart != null) {
+            start = parseDataTime(rangeStart);
+        }
+
+        if (rangeEnd != null) {
+            end = parseDataTime(rangeEnd);
+        }
+
+        List<EventFullDto> events =
+                eventStorage.adminSearchEvents(users, states, idsCategory, start, end, page).stream()
+                             .map(EventMapper::toEventFullDto)
+                             .collect(Collectors.toList());
+
+        return new ResponseEntity<>(events, HttpStatus.OK);
     }
 
     public ResponseEntity<Object> updateEventAdmin(int eventId, UpdateEventAdminRequest updateEventAdminRequest) {
@@ -237,7 +246,7 @@ public class EventService {
         return new ResponseEntity<>(EventMapper.toEventFullDto(eventUpdate), HttpStatus.OK);
     }
 
-    public ResponseEntity<Object> getEvent(int eventId) {
+    public ResponseEntity<Object> getEventPublished(long eventId) {
         Event event = checkExistsEvent(eventId);
 
         if (event.getState().equals(StateEvent.PUBLISHED)) {
@@ -266,5 +275,60 @@ public class EventService {
         } catch (DateTimeParseException e) {
             throw new LocalDataTimeParseException("Дата должна быть в формате yyyy-MM-dd HH:mm:ss");
         }
+    }
+
+    public ResponseEntity<Object> getEventsPublished(String text, List<Integer> categories, Boolean paid,
+                                                     String rangeStart, String rangeEnd, boolean onlyAvailable,
+                                                     SortEvent sort, int from, int size) {
+        PageRequest page = Page.createPageRequest(from, size);
+
+        LocalDateTime start = null;
+        LocalDateTime end = null;
+
+        if (rangeStart == null && rangeEnd == null) {
+            start = LocalDateTime.now();
+        }
+
+        if (rangeStart != null) {
+            start = parseDataTime(rangeStart);
+        }
+
+        if (rangeEnd != null) {
+            end = parseDataTime(rangeEnd);
+        }
+
+        List<Event> events = eventStorage.publicSearchAllEvents(StateEvent.PUBLISHED, text, categories,
+                paid, start, end, page);
+
+        List<EventFullDto> eventFullDtos;
+
+        if (onlyAvailable) {
+            eventFullDtos = events.stream()
+                    .filter(x -> x.getParticipantLimit() == 0 || x.getParticipantLimit() > x.getConfirmedRequests())
+                    .map(EventMapper::toEventFullDto)
+                    .collect(Collectors.toList());
+        } else {
+            eventFullDtos = events.stream()
+                    .map(EventMapper::toEventFullDto)
+                    .collect(Collectors.toList());
+        }
+
+        if (sort == SortEvent.EVENT_DATE) {
+            List<EventFullDto> eventFullDtosSorted = eventFullDtos.stream()
+                    .sorted(Comparator.comparing(EventFullDto::getEventDate))
+                    .collect(Collectors.toList());
+
+            return new ResponseEntity<>(eventFullDtosSorted, HttpStatus.OK);
+
+        } else if (sort == SortEvent.VIEWS) {
+            List<EventFullDto> eventFullDtosSorted = eventFullDtos.stream()
+                    .sorted(Comparator.comparingInt(EventFullDto::getViews))
+                    .collect(Collectors.toList());
+
+            return new ResponseEntity<>(eventFullDtosSorted, HttpStatus.OK);
+        }
+
+        //TODO сервис статистики
+        return new ResponseEntity<>(eventFullDtos, HttpStatus.OK);
     }
 }

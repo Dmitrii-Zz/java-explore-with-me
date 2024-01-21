@@ -4,12 +4,17 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.explore.event.model.SortEvent;
 import ru.practicum.explore.event.service.EventService;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @Slf4j
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/events")
@@ -18,20 +23,23 @@ public class EventsPublicController {
     private final EventService eventService;
 
     @GetMapping
-    public ResponseEntity<Object> getEvents(@RequestParam String text,
-                                            @RequestParam List<Long> categories,
-                                            @RequestParam boolean paid,
-                                            @RequestParam String rangeStart,
-                                            @RequestParam String rangeEnd,
+    public ResponseEntity<Object> getEvents(@RequestParam(defaultValue = "") String text,
+                                            @RequestParam(required = false) List<Integer> categories,
+                                            @RequestParam(required = false) Boolean paid,
+                                            @RequestParam(required = false) String rangeStart,
+                                            @RequestParam(required = false) String rangeEnd,
                                             @RequestParam(defaultValue = "false") boolean onlyAvailable,
-                                            @RequestParam String sort,
-                                            @RequestParam(defaultValue = "0") int from,
-                                            @RequestParam(defaultValue = "10") int size) {
-        return null;
+                                            @RequestParam(required = false) SortEvent sort,
+                                            @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                            @RequestParam(defaultValue = "10") @Positive int size) {
+        log.info("Публичный запрос списка событий.");
+        return eventService.getEventsPublished(text, categories, paid, rangeStart, rangeEnd,
+                                               onlyAvailable, sort, from, size);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getEventById(@PathVariable int id) {
-        return eventService.getEvent(id);
+    public ResponseEntity<Object> getEventById(@PathVariable @Positive long id) {
+        log.info("Публичный запрос информации о событии.");
+        return eventService.getEventPublished(id);
     }
 }

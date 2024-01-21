@@ -49,7 +49,8 @@ public class ExceptionApiHandler {
     }
 
     @ExceptionHandler({EventIncorectException.class, EventPublishedException.class,
-            InitiatorEventException.class, RepeatedRequestException.class, ParticipantLimitException.class})
+            InitiatorEventException.class, RepeatedRequestException.class, ParticipantLimitException.class,
+            UpdateStatusRequestEventException.class, EventLimitConfirmedException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleIncorectException(final Exception e) {
         log.debug("Произошла ошибка {}", e.getMessage());
