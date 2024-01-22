@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore.user.dto.NewUserRequest;
 import ru.practicum.explore.user.service.UserService;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
@@ -30,7 +31,7 @@ public class UserAdminController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> createUser(@RequestBody NewUserRequest newUserRequest) {
+    public ResponseEntity<Object> createUser(@RequestBody @Valid NewUserRequest newUserRequest) {
         log.info("Запрос на сохранение пользователя email = {}", newUserRequest.getEmail());
         return userService.createUsers(newUserRequest);
     }

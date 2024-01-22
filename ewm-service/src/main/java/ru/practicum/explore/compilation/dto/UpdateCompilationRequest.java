@@ -16,7 +16,7 @@ public class UpdateCompilationRequest {
 
     private List<Long> events;
 
-    private boolean pinned;
+    private Boolean pinned;
 
     @NotNull
     @Size(min = 1, max = 50)

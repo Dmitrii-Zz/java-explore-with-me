@@ -17,8 +17,10 @@ import ru.practicum.explore.except.ex.CompilationNotFountException;
 import ru.practicum.explore.utils.Page;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +38,7 @@ public class CompilationService {
 
         compilation.setEvents(events);
         CompilationDto compilationDto = CompilationMapper.toCompilationDto(compilationStorage.save(compilation));
-        return new ResponseEntity<>(compilationDto, HttpStatus.OK);
+        return new ResponseEntity<>(compilationDto, HttpStatus.CREATED);
     }
 
     public ResponseEntity<Object> deleteCompilation(long compId) {
@@ -46,17 +48,39 @@ public class CompilationService {
 
     public ResponseEntity<Object> updateCompilation(long compId, UpdateCompilationRequest updateCompilationRequest) {
         Compilation compilation = checkExistsCompilation(compId);
-        return null;
+
+        if (updateCompilationRequest.getEvents() != null) {
+            Set<Event> events = new HashSet<>();
+
+            for (long eventId : updateCompilationRequest.getEvents()) {
+                events.add(eventService.checkExistsEvent(eventId));
+            }
+            compilation.setEvents(events);
+        }
+
+        if (updateCompilationRequest.getTitle() != null) {
+            compilation.setTitle(updateCompilationRequest.getTitle());
+        }
+
+        if (updateCompilationRequest.getPinned() != null) {
+            compilation.setPinned(updateCompilationRequest.getPinned());
+        }
+
+        CompilationDto compilationDto = CompilationMapper.toCompilationDto(compilationStorage.save(compilation));
+        return new ResponseEntity<>(compilationDto, HttpStatus.OK);
     }
 
-    public ResponseEntity<Object> getCompilations(Boolean pinned, int from, int size) {
+    public ResponseEntity<Object> getCompilations(boolean pinned, int from, int size) {
         PageRequest page = Page.createPageRequest(from, size);
-        return null;
+        List<CompilationDto> compilations = compilationStorage.findAllByPinned(pinned, page).stream()
+                .map(CompilationMapper::toCompilationDto)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(compilations, HttpStatus.OK);
     }
 
     public ResponseEntity<Object> getCompilationById(long compId) {
         Compilation compilation = checkExistsCompilation(compId);
-        return null;
+        return new ResponseEntity<>(CompilationMapper.toCompilationDto(compilation), HttpStatus.OK);
     }
 
     private Compilation checkExistsCompilation(long compId) {

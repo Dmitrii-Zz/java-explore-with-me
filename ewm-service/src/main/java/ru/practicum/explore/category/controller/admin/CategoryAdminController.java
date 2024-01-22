@@ -33,7 +33,7 @@ public class CategoryAdminController {
 
     @PatchMapping("/{catId}")
     public ResponseEntity<Object> updateCategory(@PathVariable @Positive int catId,
-                                                 @RequestBody CategoryDto categoryDto) {
+                                                 @RequestBody @Validated CategoryDto categoryDto) {
         log.info("Запрос на обновление категории id = {}, name = {}", catId, categoryDto.getName());
         return categoryService.updateCategory(catId, categoryDto);
     }

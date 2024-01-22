@@ -21,14 +21,14 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 2000)
     private String annotation;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category", nullable = false)
     private Category category;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 7000)
     private String description;
 
     @Column(name = "created_on", nullable = false)
@@ -60,7 +60,7 @@ public class Event {
     @Column(name = "request_moderation")
     private boolean requestModeration;
 
-    @Column
+    @Column(length = 120)
     private String title;
 
     @Column

@@ -9,6 +9,7 @@ import ru.practicum.explore.event.dto.UpdateEventAdminRequest;
 import ru.practicum.explore.event.model.StateEvent;
 import ru.practicum.explore.event.service.EventService;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
@@ -37,7 +38,7 @@ public class EventsAdminController {
     @PatchMapping("/{eventId}")
     public ResponseEntity<Object> updateEvent(
             @PathVariable @Positive int eventId,
-            @RequestBody UpdateEventAdminRequest updateEventAdminRequest) {
+            @RequestBody @Valid UpdateEventAdminRequest updateEventAdminRequest) {
         log.info("Обновление события id = {} админом", eventId);
         return eventService.updateEventAdmin(eventId, updateEventAdminRequest);
     }

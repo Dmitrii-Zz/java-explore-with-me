@@ -2,12 +2,10 @@ package ru.practicum.explore.event.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.time.LocalDateTime;
 
 @Getter
@@ -17,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class NewEventDto {
 
-    @NotNull
+    @NotBlank
     @Size(min = 20, max = 2000, message = "Длина аннотации должна быть в диапазоне 20-2000.")
     private String annotation;
 
@@ -25,7 +23,7 @@ public class NewEventDto {
     @Positive(message = "Значение категории не может быть отрицательным.")
     private Integer category;
 
-    @NotNull
+    @NotBlank
     @Size(min = 20, max = 7000, message = "Длина описании должна быть в диапазоне 20-7000.")
     private String description;
 
@@ -37,14 +35,14 @@ public class NewEventDto {
     @NotNull
     private LocationDto location;
 
-    private Boolean paid;
+    private boolean paid;
 
-    @PositiveOrZero
-    private Integer participantLimit;
+    private int participantLimit;
 
+    @Value("${some.key:true}")
     private Boolean requestModeration;
 
-    @NotNull
+    @NotBlank
     @Size(min = 3, max = 120, message = "Длина аннотации должна быть в диапазоне 3-120.")
     private String title;
 }

@@ -13,10 +13,7 @@ import ru.practicum.explore.event.mapper.EventMapper;
 import ru.practicum.explore.event.mapper.LocationMapper;
 import ru.practicum.explore.event.model.*;
 import ru.practicum.explore.event.repository.EventRepository;
-import ru.practicum.explore.except.ex.EventIncorectException;
-import ru.practicum.explore.except.ex.EventNotFountException;
-import ru.practicum.explore.except.ex.EventPublishedException;
-import ru.practicum.explore.except.ex.LocalDataTimeParseException;
+import ru.practicum.explore.except.ex.*;
 import ru.practicum.explore.user.model.User;
 import ru.practicum.explore.user.service.UserService;
 import ru.practicum.explore.utils.Page;
@@ -47,7 +44,7 @@ public class EventService {
         Event event = EventMapper.toEvent(newEventDto);
 
         if (!event.getEventDate().isAfter(LocalDateTime.now().plusHours(2))) {
-            throw new EventIncorectException("Field: eventDate. Error: должно содержать дату, " +
+            throw new DateTimeValidateException("Field: eventDate. Error: должно содержать дату, " +
                     "которая еще не наступила. Value:");
         }
 
@@ -120,7 +117,7 @@ public class EventService {
 
         if (updateEventUserRequest.getEventDate() != null) {
             if (updateEventUserRequest.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
-                throw new EventIncorectException("Field: eventDate. Error: должно содержать дату, " +
+                throw new DateTimeValidateException("Field: eventDate. Error: должно содержать дату, " +
                         "которая еще не наступила. Value:");
             } else {
                 event.setEventDate(updateEventUserRequest.getEventDate());
@@ -205,7 +202,7 @@ public class EventService {
 
         if (updateEventAdminRequest.getEventDate() != null) {
             if (updateEventAdminRequest.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
-                throw new EventIncorectException("Field: eventDate. Error: должно содержать дату, " +
+                throw new DateTimeValidateException("Field: eventDate. Error: должно содержать дату, " +
                         "которая еще не наступила. Value:");
             } else {
                 event.setEventDate(updateEventAdminRequest.getEventDate());
@@ -295,6 +292,10 @@ public class EventService {
 
         if (rangeEnd != null) {
             end = parseDataTime(rangeEnd);
+        }
+
+        if (start != null && end != null && start.isAfter(end)) {
+            throw new DateTimeValidateException("Передана некорректные даты.");
         }
 
         List<Event> events = eventStorage.publicSearchAllEvents(StateEvent.PUBLISHED, text, categories,

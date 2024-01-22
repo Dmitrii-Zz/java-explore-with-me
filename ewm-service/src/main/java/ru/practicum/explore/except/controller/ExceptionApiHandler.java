@@ -23,7 +23,7 @@ public class ExceptionApiHandler {
 
     @ExceptionHandler({DateTimeParseException.class, MethodArgumentNotValidException.class,
             ConstraintViolationException.class, HttpMessageNotReadableException.class,
-            LocalDataTimeParseException.class})
+            LocalDataTimeParseException.class, DateTimeValidateException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleRequestIncorrectlyException(final Exception e) {
         log.debug("Произошла ошибка {}", e.getMessage());

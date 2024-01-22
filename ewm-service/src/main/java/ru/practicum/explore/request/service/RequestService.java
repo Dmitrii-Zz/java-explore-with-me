@@ -45,6 +45,19 @@ public class RequestService {
             throw new EventPublishedException("Нельзя участвовать в неопубликованном событии.");
         }
 
+        Request request = Request.builder()
+                .created(LocalDateTime.now())
+                .event(event)
+                .requester(user)
+                .build();
+
+        if (event.getParticipantLimit() == 0) {
+            eventService.changeConfirmedRequests(eventId, true);
+            request.setStatus(RequestStatus.CONFIRMED);
+            return new ResponseEntity<>(RequestMapper.toParticipationRequestDto(requestStorage.save(request)),
+                    HttpStatus.CREATED);
+        }
+
         List<RequestStatus> REQUEST_STATUSES = List.of(RequestStatus.CANCELED,
                 RequestStatus.REJECTED, RequestStatus.PENDING);
 
@@ -54,12 +67,6 @@ public class RequestService {
             throw new ParticipantLimitException("Превышен лимит заявок на событие.");
         }
 
-        Request request = Request.builder()
-                .created(LocalDateTime.now())
-                .event(event)
-                .requester(user)
-                .build();
-
         if (event.isRequestModeration()) {
             request.setStatus(RequestStatus.PENDING);
         } else {
@@ -68,7 +75,7 @@ public class RequestService {
         }
 
         return new ResponseEntity<>(RequestMapper.toParticipationRequestDto(requestStorage.save(request)),
-                HttpStatus.OK);
+                HttpStatus.CREATED);
     }
 
     public ResponseEntity<Object> cancelRequest(long userId, long requestId) {

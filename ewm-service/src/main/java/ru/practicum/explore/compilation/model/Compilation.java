@@ -19,12 +19,14 @@ public class Compilation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column
+    @ManyToMany
+    @JoinTable(name = "compilation_events", joinColumns = @JoinColumn(name = "comp_id"),
+            inverseJoinColumns = @JoinColumn(name = "event_id"))
     private Set<Event> events;
 
     @Column(nullable = false)
     private boolean pinned;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String title;
 }

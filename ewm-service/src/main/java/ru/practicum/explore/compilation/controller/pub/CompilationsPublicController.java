@@ -21,7 +21,7 @@ public class CompilationsPublicController {
     private final CompilationService compilationService;
 
     @GetMapping
-    public ResponseEntity<Object> getCompilations(@RequestParam(required = false) Boolean pinned,
+    public ResponseEntity<Object> getCompilations(@RequestParam(defaultValue = "false") boolean pinned,
                                                   @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                                   @RequestParam(defaultValue = "10") @Positive int size) {
         log.info("Запрос подборки событий, pinned = {}, from = {}, size = {}", pinned, from, size);
