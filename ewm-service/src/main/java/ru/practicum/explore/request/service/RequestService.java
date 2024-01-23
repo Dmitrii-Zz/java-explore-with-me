@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.practicum.explore.event.model.Event;
+import ru.practicum.explore.event.model.StateAction;
 import ru.practicum.explore.event.model.StateEvent;
 import ru.practicum.explore.event.service.EventService;
 import ru.practicum.explore.except.ex.*;
@@ -110,14 +111,19 @@ public class RequestService {
 
     public ResponseEntity<Object> getRequestsInEvent(long userId, long eventId) {
         userService.checkExistsUser(userId);
-        eventService.checkExistsEvent(eventId);
+        Event event = eventService.checkExistsEvent(eventId);
 
-        List<ParticipationRequestDto> requests =
-                requestStorage.findAllByRequesterIdAndEventId(userId, eventId).stream()
+        if (!(event.getInitiator().getId() == userId)) {
+            throw new EventNotFountException("Event with id = " + eventId + " was not found");
+        }
+
+        List<Request> requests = requestStorage.findAllByEventId(eventId);
+
+        List<ParticipationRequestDto> requestsDto = requests.stream()
                         .map(RequestMapper::toParticipationRequestDto)
                         .collect(Collectors.toList());
 
-        return new ResponseEntity<>(requests, HttpStatus.OK);
+        return new ResponseEntity<>(requestsDto, HttpStatus.OK);
     }
 
     public ResponseEntity<Object> updateStatusRequests(long userId, long eventId,
@@ -134,7 +140,7 @@ public class RequestService {
         }
 
         List<Request> requests = eventRequestStatusUpdateRequest.getRequestIds().stream()
-                .map(this::checkExistsAndStatusRequest)
+                .map(this::checkExistsRequest)
                 .collect(Collectors.toList());
 
         for (Request request : requests) {
@@ -143,6 +149,11 @@ public class RequestService {
 
             if (checkEvent.getConfirmedRequests() >= checkEvent.getParticipantLimit()) {
                 throw new EventLimitConfirmedException("The participant limit has been reached");
+            }
+
+            if (request.getStatus().equals(eventRequestStatusUpdateRequest.getStatus())) {
+                throw new UpdateStatusRequestEventException("Статус " +
+                        eventRequestStatusUpdateRequest.getStatus() + " уже применен.");
             }
 
             request.setStatus(eventRequestStatusUpdateRequest.getStatus());
@@ -160,15 +171,15 @@ public class RequestService {
         return new ResponseEntity<>(requestDto, HttpStatus.OK);
     }
 
-    private Request checkExistsAndStatusRequest(long requestId) {
-        Request request = requestStorage.findByIdAndStatus(requestId, RequestStatus.PENDING);
-
-        if (request == null) {
-            throw new RequestNotFountException("Request with id = " + requestId + " was not found");
-        }
-
-        return request;
-    }
+//    private Request checkExistsAndStatusRequest(long requestId) {
+//        Request request = requestStorage.findByIdAndStatus(requestId, RequestStatus.PENDING);
+//
+//        if (request == null) {
+//            throw new RequestNotFountException("Request with id = " + requestId + " was not found");
+//        }
+//
+//        return request;
+//    }
 
     private Request checkExistsRequest(long requestId) {
         Optional<Request> optionalRequest = requestStorage.findById(requestId);

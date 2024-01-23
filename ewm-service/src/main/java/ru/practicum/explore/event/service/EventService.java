@@ -1,11 +1,16 @@
 package ru.practicum.explore.event.service;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import ru.practicum.explore.StatClient;
 import ru.practicum.explore.category.model.Category;
 import ru.practicum.explore.category.service.CategoryService;
 import ru.practicum.explore.event.dto.*;
@@ -18,6 +23,7 @@ import ru.practicum.explore.user.model.User;
 import ru.practicum.explore.user.service.UserService;
 import ru.practicum.explore.utils.Page;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -35,6 +41,8 @@ public class EventService {
     private final UserService userService;
     private final CategoryService categoryService;
     private final LocationService locationService;
+    @Autowired
+    private final StatClient statClient;
 
     public ResponseEntity<Object> createEvent(long userId, NewEventDto newEventDto) {
         User user = userService.checkExistsUser(userId);
@@ -183,7 +191,7 @@ public class EventService {
     public ResponseEntity<Object> updateEventAdmin(int eventId, UpdateEventAdminRequest updateEventAdminRequest) {
         Event event = checkExistsEvent(eventId);
 
-        if (event.getState().equals(StateEvent.PUBLISHED)) {
+        if (event.getState().equals(StateEvent.PUBLISHED) || event.getState().equals(StateEvent.CANCELED)) {
             throw new EventPublishedException("Only pending or canceled events can be changed.");
         }
 
@@ -243,11 +251,16 @@ public class EventService {
         return new ResponseEntity<>(EventMapper.toEventFullDto(eventUpdate), HttpStatus.OK);
     }
 
-    public ResponseEntity<Object> getEventPublished(long eventId) {
+    public ResponseEntity<Object> getEventPublished(long eventId, HttpServletRequest request) {
         Event event = checkExistsEvent(eventId);
 
         if (event.getState().equals(StateEvent.PUBLISHED)) {
-            //TODO сервис статистики
+//            statClient.createStat(HitDto.builder()
+//                            .app("ewm-main-service")
+//                            .uri(request.getRequestURI())
+//                            .ip(request.getRemoteAddr())
+//                            .timestamp(FORMATTER.format(LocalDateTime.now()))
+//                            .build());
             return new ResponseEntity<>(EventMapper.toEventFullDto(event), HttpStatus.OK);
         }
 
@@ -276,7 +289,14 @@ public class EventService {
 
     public ResponseEntity<Object> getEventsPublished(String text, List<Integer> categories, Boolean paid,
                                                      String rangeStart, String rangeEnd, boolean onlyAvailable,
-                                                     SortEvent sort, int from, int size) {
+                                                     SortEvent sort, int from, int size, HttpServletRequest request) {
+//        statClient.createStat(HitDto.builder()
+//                .app("ewm-main-service")
+//                .uri(request.getRequestURI())
+//                .ip(request.getRemoteAddr())
+//                .timestamp(FORMATTER.format(LocalDateTime.now()))
+//                .build());
+
         PageRequest page = Page.createPageRequest(from, size);
 
         LocalDateTime start = null;

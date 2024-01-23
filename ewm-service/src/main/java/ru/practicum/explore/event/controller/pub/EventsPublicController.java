@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore.event.model.SortEvent;
 import ru.practicum.explore.event.service.EventService;
 
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
@@ -31,15 +33,17 @@ public class EventsPublicController {
                                             @RequestParam(defaultValue = "false") boolean onlyAvailable,
                                             @RequestParam(required = false) SortEvent sort,
                                             @RequestParam(defaultValue = "0") @PositiveOrZero int from,
-                                            @RequestParam(defaultValue = "10") @Positive int size) {
+                                            @RequestParam(defaultValue = "10") @Positive int size,
+                                            HttpServletRequest request) {
         log.info("Публичный запрос списка событий.");
         return eventService.getEventsPublished(text, categories, paid, rangeStart, rangeEnd,
-                                               onlyAvailable, sort, from, size);
+                                               onlyAvailable, sort, from, size, request);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getEventById(@PathVariable @Positive long id) {
+    public ResponseEntity<Object> getEventById(@PathVariable @Positive long id,
+                                               HttpServletRequest request) {
         log.info("Публичный запрос информации о событии.");
-        return eventService.getEventPublished(id);
+        return eventService.getEventPublished(id, request);
     }
 }

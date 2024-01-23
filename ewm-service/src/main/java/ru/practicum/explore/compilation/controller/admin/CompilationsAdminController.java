@@ -23,7 +23,8 @@ public class CompilationsAdminController {
 
     @PostMapping
     public ResponseEntity<Object> createCompilation(@RequestBody @Valid NewCompilationDto newCompilationDto) {
-        log.info("Запрос на создание подборки.");
+        log.info("Запрос на создание подборки. " +
+                "event: " + newCompilationDto.getEvents());
         return compilationService.createCompilation(newCompilationDto);
     }
 

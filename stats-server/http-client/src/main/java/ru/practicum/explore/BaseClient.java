@@ -9,10 +9,13 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.Map;
 
-@RequiredArgsConstructor
 public class BaseClient {
 
     private final RestTemplate rest;
+
+    public BaseClient(RestTemplate rest) {
+        this.rest = rest;
+    }
 
     protected ResponseEntity<Object> get(String path, @Nullable Map<String, Object> parameters) {
         return makeAndSendRequest(HttpMethod.GET, path, parameters, null);

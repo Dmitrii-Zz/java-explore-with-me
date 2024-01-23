@@ -1,6 +1,7 @@
 package ru.practicum.explore.compilation.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CompilationService {
@@ -32,12 +34,16 @@ public class CompilationService {
         Compilation compilation = CompilationMapper.toCompilation(newCompilationDto);
         Set<Event> events = new HashSet<>();
 
-        for (long eventId : newCompilationDto.getEvents()) {
-            events.add(eventService.checkExistsEvent(eventId));
+        if (newCompilationDto.getEvents() != null) {
+            for (long eventId : newCompilationDto.getEvents()) {
+                events.add(eventService.checkExistsEvent(eventId));
+            }
         }
 
+        log.info("Размер списка event после стрима: " + events.size());
         compilation.setEvents(events);
-        CompilationDto compilationDto = CompilationMapper.toCompilationDto(compilationStorage.save(compilation));
+        Compilation saveComp = compilationStorage.save(compilation);
+        CompilationDto compilationDto = CompilationMapper.toCompilationDto(saveComp);
         return new ResponseEntity<>(compilationDto, HttpStatus.CREATED);
     }
 

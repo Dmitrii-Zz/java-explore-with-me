@@ -39,8 +39,7 @@ public class NewEventDto {
 
     private int participantLimit;
 
-    @Value("${some.key:true}")
-    private Boolean requestModeration;
+    private boolean requestModeration = true;
 
     @NotBlank
     @Size(min = 3, max = 120, message = "Длина аннотации должна быть в диапазоне 3-120.")

@@ -19,8 +19,8 @@ public class CompilationMapper {
                 .collect(Collectors.toList());
 
         return CompilationDto.builder()
-                .id(compilation.getId())
                 .events(Set.copyOf(events))
+                .id(compilation.getId())
                 .pinned(compilation.isPinned())
                 .title(compilation.getTitle())
                 .build();

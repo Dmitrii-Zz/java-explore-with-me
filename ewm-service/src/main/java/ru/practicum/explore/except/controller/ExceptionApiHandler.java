@@ -1,6 +1,8 @@
 package ru.practicum.explore.except.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -50,7 +52,8 @@ public class ExceptionApiHandler {
 
     @ExceptionHandler({EventIncorectException.class, EventPublishedException.class,
             InitiatorEventException.class, RepeatedRequestException.class, ParticipantLimitException.class,
-            UpdateStatusRequestEventException.class, EventLimitConfirmedException.class})
+            UpdateStatusRequestEventException.class, EventLimitConfirmedException.class,
+            DataIntegrityViolationException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleIncorectException(final Exception e) {
         log.debug("Произошла ошибка {}", e.getMessage());
