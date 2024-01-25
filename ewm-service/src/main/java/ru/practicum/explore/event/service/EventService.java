@@ -1,11 +1,9 @@
 package ru.practicum.explore.event.service;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.lang.Object;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +11,8 @@ import org.springframework.stereotype.Service;
 import ru.practicum.explore.StatClient;
 import ru.practicum.explore.category.model.Category;
 import ru.practicum.explore.category.service.CategoryService;
+import ru.practicum.explore.dto.HitDto;
+import ru.practicum.explore.dto.StatsDto;
 import ru.practicum.explore.event.dto.*;
 import ru.practicum.explore.event.mapper.EventMapper;
 import ru.practicum.explore.event.mapper.LocationMapper;
@@ -27,9 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -41,7 +39,6 @@ public class EventService {
     private final UserService userService;
     private final CategoryService categoryService;
     private final LocationService locationService;
-    @Autowired
     private final StatClient statClient;
 
     public ResponseEntity<Object> createEvent(long userId, NewEventDto newEventDto) {
@@ -254,17 +251,23 @@ public class EventService {
     public ResponseEntity<Object> getEventPublished(long eventId, HttpServletRequest request) {
         Event event = checkExistsEvent(eventId);
 
-        if (event.getState().equals(StateEvent.PUBLISHED)) {
-//            statClient.createStat(HitDto.builder()
-//                            .app("ewm-main-service")
-//                            .uri(request.getRequestURI())
-//                            .ip(request.getRemoteAddr())
-//                            .timestamp(FORMATTER.format(LocalDateTime.now()))
-//                            .build());
-            return new ResponseEntity<>(EventMapper.toEventFullDto(event), HttpStatus.OK);
+        if (!event.getState().equals(StateEvent.PUBLISHED)) {
+            throw new EventNotFountException("Event with id= " + eventId + " was not found");
         }
 
-        throw new EventNotFountException("Event with id= " + eventId + " was not found");
+        statClient.createStat(HitDto.builder()
+                .app("ewm-main-service")
+                .uri(request.getRequestURI())
+                .ip(request.getRemoteAddr())
+                .timestamp(FORMATTER.format(LocalDateTime.now()))
+                .build());
+
+        List<String> uris = List.of("/events/" + eventId);
+
+        ResponseEntity<Object> objectStatsDto = (statClient.getStat(LocalDateTime.now().minusYears(1).format(FORMATTER),
+                LocalDateTime.now().format(FORMATTER), uris, true));
+
+        return new ResponseEntity<>(EventMapper.toEventFullDto(event), HttpStatus.OK);
     }
 
     public void changeConfirmedRequests(long eventId, boolean increment) {
@@ -290,15 +293,8 @@ public class EventService {
     public ResponseEntity<Object> getEventsPublished(String text, List<Integer> categories, Boolean paid,
                                                      String rangeStart, String rangeEnd, boolean onlyAvailable,
                                                      SortEvent sort, int from, int size, HttpServletRequest request) {
-//        statClient.createStat(HitDto.builder()
-//                .app("ewm-main-service")
-//                .uri(request.getRequestURI())
-//                .ip(request.getRemoteAddr())
-//                .timestamp(FORMATTER.format(LocalDateTime.now()))
-//                .build());
 
         PageRequest page = Page.createPageRequest(from, size);
-
         LocalDateTime start = null;
         LocalDateTime end = null;
 
@@ -334,6 +330,13 @@ public class EventService {
                     .collect(Collectors.toList());
         }
 
+        statClient.createStat(HitDto.builder()
+                .app("ewm-main-service")
+                .uri(request.getRequestURI())
+                .ip(request.getRemoteAddr())
+                .timestamp(FORMATTER.format(LocalDateTime.now()))
+                .build());
+
         if (sort == SortEvent.EVENT_DATE) {
             List<EventFullDto> eventFullDtosSorted = eventFullDtos.stream()
                     .sorted(Comparator.comparing(EventFullDto::getEventDate))
@@ -349,7 +352,6 @@ public class EventService {
             return new ResponseEntity<>(eventFullDtosSorted, HttpStatus.OK);
         }
 
-        //TODO сервис статистики
         return new ResponseEntity<>(eventFullDtos, HttpStatus.OK);
     }
 }

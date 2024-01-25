@@ -1,9 +1,5 @@
 package ru.practicum.explore;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -19,7 +15,8 @@ import java.util.Map;
 @Service
 public class StatClient extends BaseClient {
 
-    public StatClient(@Value("${explore-server.url}") String serverUrl, RestTemplateBuilder builder) {
+    @Autowired
+    public StatClient(@Value("${STATS.URI}") String serverUrl, RestTemplateBuilder builder) {
         super(builder.uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
                 .requestFactory(HttpComponentsClientHttpRequestFactory::new)
                 .build());
