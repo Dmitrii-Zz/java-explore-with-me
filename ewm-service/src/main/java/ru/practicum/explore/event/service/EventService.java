@@ -1,7 +1,5 @@
 package ru.practicum.explore.event.service;
 
-import java.lang.Object;
-
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
