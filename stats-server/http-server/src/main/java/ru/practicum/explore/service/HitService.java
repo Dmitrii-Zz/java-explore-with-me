@@ -25,11 +25,11 @@ public class HitService {
 
     private final HitRepository storage;
 
-    public ResponseEntity<Object> createHit(HitDto hitDto) {
+    public void createHit(HitDto hitDto) {
         Hit hit = HitMapper.toHit(hitDto);
         hit.setTimestamp(LocalDateTime.parse(hitDto.getTimestamp(), FORMATTER));
         storage.save(hit);
-        return new ResponseEntity<>("Информация сохранена", HttpStatus.CREATED);
+        //return new ResponseEntity<>("Информация сохранена", HttpStatus.CREATED);
     }
 
     public ResponseEntity<Object> getHit(String strStart, String strEnd, List<String> uris, Boolean unique) {

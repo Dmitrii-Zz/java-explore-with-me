@@ -22,8 +22,8 @@ public class StatClient extends BaseClient {
                 .build());
     }
 
-    public ResponseEntity<Object> createStat(HitDto hit) {
-        return post(hit);
+    public void createStat(HitDto hit) {
+        post(hit);
     }
 
     public ResponseEntity<Object> getStat(String start, String end, List<String> uris, Boolean unique) {

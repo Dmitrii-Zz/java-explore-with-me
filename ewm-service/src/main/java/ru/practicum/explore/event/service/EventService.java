@@ -2,6 +2,9 @@ package ru.practicum.explore.event.service;
 
 import java.lang.Object;
 
+import aj.org.objectweb.asm.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -262,11 +265,18 @@ public class EventService {
                 .timestamp(FORMATTER.format(LocalDateTime.now()))
                 .build());
 
-        List<String> uris = List.of("/events/" + eventId);
+        String uri = String.format("/events/%s", eventId);
+        List<String> uris = new ArrayList<>();
+        uris.add(uri);
 
-        ResponseEntity<Object> objectStatsDto = (statClient.getStat(LocalDateTime.now().minusYears(1).format(FORMATTER),
-                LocalDateTime.now().format(FORMATTER), uris, true));
+        ResponseEntity<Object> objectStatsDto = statClient.getStat(LocalDateTime.now().minusYears(1).format(FORMATTER),
+                LocalDateTime.now().format(FORMATTER), uris, true);
 
+        ObjectMapper mapper = new ObjectMapper();
+
+        JavaType type = mapper.getTypeFactory().constructCollectionType(List.class, StatsDto.class);
+        List<StatsDto> dtos = mapper.convertValue(objectStatsDto.getBody(), type);
+        event.setViews((int) dtos.get(0).getHits());
         return new ResponseEntity<>(EventMapper.toEventFullDto(event), HttpStatus.OK);
     }
 
@@ -330,10 +340,12 @@ public class EventService {
                     .collect(Collectors.toList());
         }
 
+        String ip = request.getRemoteAddr();
+
         statClient.createStat(HitDto.builder()
                 .app("ewm-main-service")
                 .uri(request.getRequestURI())
-                .ip(request.getRemoteAddr())
+                .ip(ip)
                 .timestamp(FORMATTER.format(LocalDateTime.now()))
                 .build());
 

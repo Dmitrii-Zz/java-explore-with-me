@@ -22,9 +22,9 @@ public class HitController {
     private final HitService hitService;
 
     @PostMapping("/hit")
-    public ResponseEntity<Object> createHit(@Validated @RequestBody HitDto hitDto) {
+    public void createHit(@Validated @RequestBody HitDto hitDto) {
         log.info("Сохранение сервиса {} (ip = {}).", hitDto.getApp(), hitDto.getIp());
-        return hitService.createHit(hitDto);
+        hitService.createHit(hitDto);
     }
 
     @GetMapping("/stats")
