@@ -1,6 +1,5 @@
 package ru.practicum.explore.compilation.dto;
 
-import com.sun.istack.Nullable;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;

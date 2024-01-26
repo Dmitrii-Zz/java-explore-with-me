@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.explore.request.service.RequestService;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 
 @Slf4j

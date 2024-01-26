@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.practicum.explore.event.model.Event;
-import ru.practicum.explore.event.model.StateAction;
 import ru.practicum.explore.event.model.StateEvent;
 import ru.practicum.explore.event.service.EventService;
 import ru.practicum.explore.except.ex.*;
@@ -59,10 +58,10 @@ public class RequestService {
                     HttpStatus.CREATED);
         }
 
-        List<RequestStatus> REQUEST_STATUSES = List.of(RequestStatus.CANCELED,
+        List<RequestStatus> requestStatuses = List.of(RequestStatus.CANCELED,
                 RequestStatus.REJECTED, RequestStatus.PENDING);
 
-        long countRequestEvent = requestStorage.countByEventIdAndStatusIsNotIn(eventId, REQUEST_STATUSES);
+        long countRequestEvent = requestStorage.countByEventIdAndStatusIsNotIn(eventId, requestStatuses);
 
         if (event.getParticipantLimit() != 0 && countRequestEvent >= event.getParticipantLimit()) {
             throw new ParticipantLimitException("Превышен лимит заявок на событие.");
@@ -132,7 +131,7 @@ public class RequestService {
         Event event = eventService.checkExistsEvent(eventId);
 
         if (event.getInitiator().getId() != userId) {
-            throw new EventNotFountException("Event with " + eventId +" was not found.");
+            throw new EventNotFountException("Event with " + eventId + " was not found.");
         }
 
         if (event.getParticipantLimit() == 0 || !event.isRequestModeration()) {
@@ -193,11 +192,11 @@ public class RequestService {
 
     private void checkForRepeatedRequest(long userId, long eventId) {
 
-        List<RequestStatus> REQUEST_STATUSES = List.of(RequestStatus.CANCELED,
+        List<RequestStatus> requestStatuses = List.of(RequestStatus.CANCELED,
                 RequestStatus.REJECTED);
 
         Request request =
-                requestStorage.findByRequesterIdAndEventIdAndStatusIsNotIn(userId, eventId, REQUEST_STATUSES);
+                requestStorage.findByRequesterIdAndEventIdAndStatusIsNotIn(userId, eventId, requestStatuses);
 
         if (request != null) {
             throw new RepeatedRequestException("Заявка уже существует.");
