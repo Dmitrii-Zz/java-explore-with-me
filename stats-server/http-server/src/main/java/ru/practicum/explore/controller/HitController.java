@@ -23,7 +23,7 @@ public class HitController {
 
     @PostMapping("/hit")
     public void createHit(@Validated @RequestBody HitDto hitDto) {
-        log.info("Сохранение сервиса {} (ip = {}).", hitDto.getApp(), hitDto.getIp());
+        log.info("Сохранение uri {} (ip = {}).", hitDto.getUri(), hitDto.getIp());
         hitService.createHit(hitDto);
     }
 
