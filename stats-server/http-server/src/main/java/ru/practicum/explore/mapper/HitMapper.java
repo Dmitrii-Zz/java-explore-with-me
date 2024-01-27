@@ -12,4 +12,13 @@ public class HitMapper {
                 .uri(hitDto.getUri())
                 .build();
     }
+
+    public static HitDto toHitDto(Hit hit) {
+        return HitDto.builder()
+                .id(hit.getId())
+                .app(hit.getApp())
+                .uri(hit.getUri())
+                .ip(hit.getIp())
+                .build();
+    }
 }

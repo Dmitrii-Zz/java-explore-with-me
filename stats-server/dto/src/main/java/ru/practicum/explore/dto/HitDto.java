@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 @Builder
 public class HitDto {
+    private long id;
     private String app;
     private String uri;
     private String ip;

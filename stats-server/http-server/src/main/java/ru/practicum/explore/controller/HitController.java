@@ -21,9 +21,9 @@ public class HitController {
     private final HitService hitService;
 
     @PostMapping("/hit")
-    public void createHit(@Validated @RequestBody HitDto hitDto) {
+    public ResponseEntity<Object> createHit(@Validated @RequestBody HitDto hitDto) {
         log.info("Сохранение uri {} (ip = {}).", hitDto.getUri(), hitDto.getIp());
-        hitService.createHit(hitDto);
+        return hitService.createHit(hitDto);
     }
 
     @GetMapping("/stats")
