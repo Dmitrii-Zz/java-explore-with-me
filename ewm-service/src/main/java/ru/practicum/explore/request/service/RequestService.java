@@ -10,6 +10,7 @@ import ru.practicum.explore.event.model.StateEvent;
 import ru.practicum.explore.event.service.EventService;
 import ru.practicum.explore.except.ex.*;
 import ru.practicum.explore.request.dto.EventRequestStatusUpdateRequest;
+import ru.practicum.explore.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.explore.request.dto.ParticipationRequestDto;
 import ru.practicum.explore.request.mapper.RequestMapper;
 import ru.practicum.explore.request.model.Request;
@@ -127,6 +128,9 @@ public class RequestService {
 
     public ResponseEntity<Object> updateStatusRequests(long userId, long eventId,
                              EventRequestStatusUpdateRequest eventRequestStatusUpdateRequest) {
+
+        RequestStatus updateStatus = eventRequestStatusUpdateRequest.getStatus();
+
         userService.checkExistsUser(userId);
         Event event = eventService.checkExistsEvent(eventId);
 
@@ -150,15 +154,15 @@ public class RequestService {
                 throw new EventLimitConfirmedException("The participant limit has been reached");
             }
 
-            if (request.getStatus().equals(eventRequestStatusUpdateRequest.getStatus())) {
+            if (request.getStatus().equals(updateStatus)) {
                 throw new UpdateStatusRequestEventException("Статус " +
-                        eventRequestStatusUpdateRequest.getStatus() + " уже применен.");
+                        updateStatus + " уже применен.");
             }
 
-            request.setStatus(eventRequestStatusUpdateRequest.getStatus());
+            request.setStatus(updateStatus);
             requestStorage.save(request);
 
-            if (eventRequestStatusUpdateRequest.getStatus().equals(RequestStatus.CONFIRMED)) {
+            if (updateStatus.equals(RequestStatus.CONFIRMED)) {
                 eventService.changeConfirmedRequests(eventId, true);
             }
         }
@@ -167,18 +171,16 @@ public class RequestService {
                 .map(RequestMapper::toParticipationRequestDto)
                 .collect(Collectors.toList());
 
-        return new ResponseEntity<>(requestDto, HttpStatus.OK);
-    }
+        EventRequestStatusUpdateResult eventRequestStatusUpdateResult = new EventRequestStatusUpdateResult();
 
-//    private Request checkExistsAndStatusRequest(long requestId) {
-//        Request request = requestStorage.findByIdAndStatus(requestId, RequestStatus.PENDING);
-//
-//        if (request == null) {
-//            throw new RequestNotFountException("Request with id = " + requestId + " was not found");
-//        }
-//
-//        return request;
-//    }
+        if (updateStatus.equals(RequestStatus.CONFIRMED)) {
+            eventRequestStatusUpdateResult.setConfirmedRequests(requestDto);
+        } else {
+            eventRequestStatusUpdateResult.setRejectedRequests(requestDto);
+        }
+
+        return new ResponseEntity<>(eventRequestStatusUpdateResult, HttpStatus.OK);
+    }
 
     private Request checkExistsRequest(long requestId) {
         Optional<Request> optionalRequest = requestStorage.findById(requestId);
