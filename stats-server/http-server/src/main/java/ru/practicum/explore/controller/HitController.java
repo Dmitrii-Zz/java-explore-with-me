@@ -14,7 +14,7 @@ import java.util.List;
 
 @Slf4j
 @Validated
-@Controller
+@RestController
 @RequestMapping
 @RequiredArgsConstructor
 public class HitController {
