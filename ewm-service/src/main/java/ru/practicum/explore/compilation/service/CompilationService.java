@@ -49,6 +49,7 @@ public class CompilationService {
 
     public ResponseEntity<Object> deleteCompilation(long compId) {
         checkExistsCompilation(compId);
+        compilationStorage.deleteById(compId);
         return new ResponseEntity<>("Подборка удалена.", HttpStatus.NO_CONTENT);
     }
 

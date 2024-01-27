@@ -2,7 +2,6 @@ package ru.practicum.explore.compilation.dto;
 
 import lombok.*;
 
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.List;
 
@@ -17,7 +16,6 @@ public class UpdateCompilationRequest {
 
     private Boolean pinned;
 
-    @NotNull
     @Size(min = 1, max = 50)
     private String title;
 }
