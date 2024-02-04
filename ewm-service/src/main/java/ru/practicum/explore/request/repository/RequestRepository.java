@@ -7,11 +7,8 @@ import ru.practicum.explore.request.model.RequestStatus;
 import java.util.List;
 
 public interface RequestRepository extends JpaRepository<Request, Long> {
+
     Request findByRequesterIdAndEventIdAndStatusIsNotIn(long userId, long eventId, List<RequestStatus> requests);
-
-    Request findByIdAndStatus(long requestId, RequestStatus status);
-
-    List<Request> findAllByRequesterIdAndEventId(long userId, long eventId);
 
     List<Request> findAllByEventId(long eventId);
 
