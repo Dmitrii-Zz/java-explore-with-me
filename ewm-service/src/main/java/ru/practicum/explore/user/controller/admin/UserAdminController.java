@@ -2,6 +2,7 @@ package ru.practicum.explore.user.controller.admin;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -37,8 +38,9 @@ public class UserAdminController {
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Object> deleteUser(@PathVariable @PositiveOrZero long userId) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUser(@PathVariable @PositiveOrZero long userId) {
         log.info("Удаление пользователя id = {}", userId);
-        return userService.deleteUser(userId);
+        userService.deleteUser(userId);
     }
 }

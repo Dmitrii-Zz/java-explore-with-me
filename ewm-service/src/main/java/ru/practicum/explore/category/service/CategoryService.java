@@ -29,10 +29,9 @@ public class CategoryService {
         return new ResponseEntity<>(saveCategory, HttpStatus.CREATED);
     }
 
-    public ResponseEntity<Object> deleteCategory(int catId) {
+    public void deleteCategory(int catId) {
         checkExistCategory(catId);
         categoryStorage.deleteById(catId);
-        return new ResponseEntity<>("Категория удалена", HttpStatus.NO_CONTENT);
     }
 
     public ResponseEntity<Object> updateCategory(int catId, CategoryDto categoryDto) {

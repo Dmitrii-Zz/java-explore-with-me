@@ -46,10 +46,9 @@ public class UserService {
         return new ResponseEntity<>(UserMapper.toUserDto(saveUser), HttpStatus.CREATED);
     }
 
-    public ResponseEntity<Object> deleteUser(long id) {
+    public void deleteUser(long id) {
         checkExistsUser(id);
         userStorage.deleteById(id);
-        return new ResponseEntity<>("Пользователь удален", HttpStatus.NO_CONTENT);
     }
 
     public User checkExistsUser(long id) {
