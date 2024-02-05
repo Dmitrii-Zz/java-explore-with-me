@@ -1,7 +1,6 @@
 package ru.practicum.explore;
 
 import io.micrometer.core.lang.Nullable;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
@@ -9,17 +8,20 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.Map;
 
-@RequiredArgsConstructor
 public class BaseClient {
 
     private final RestTemplate rest;
+
+    public BaseClient(RestTemplate rest) {
+        this.rest = rest;
+    }
 
     protected ResponseEntity<Object> get(String path, @Nullable Map<String, Object> parameters) {
         return makeAndSendRequest(HttpMethod.GET, path, parameters, null);
     }
 
-    protected <T> ResponseEntity<Object> post(T body) {
-        return makeAndSendRequest(HttpMethod.POST, "/hit", null, body);
+    protected <T> void post(T body) {
+        makeAndSendRequest(HttpMethod.POST, "/hit", null, body);
     }
 
     private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod httpMethod,

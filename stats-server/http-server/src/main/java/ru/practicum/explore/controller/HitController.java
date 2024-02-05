@@ -4,7 +4,6 @@ import com.sun.istack.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore.dto.HitDto;
@@ -14,7 +13,7 @@ import java.util.List;
 
 @Slf4j
 @Validated
-@Controller
+@RestController
 @RequestMapping
 @RequiredArgsConstructor
 public class HitController {
@@ -23,7 +22,7 @@ public class HitController {
 
     @PostMapping("/hit")
     public ResponseEntity<Object> createHit(@Validated @RequestBody HitDto hitDto) {
-        log.info("Сохранение сервиса {} (ip = {}).", hitDto.getApp(), hitDto.getIp());
+        log.info("Сохранение uri {} (ip = {}).", hitDto.getUri(), hitDto.getIp());
         return hitService.createHit(hitDto);
     }
 

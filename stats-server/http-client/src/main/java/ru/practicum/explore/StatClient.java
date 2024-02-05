@@ -16,14 +16,14 @@ import java.util.Map;
 public class StatClient extends BaseClient {
 
     @Autowired
-    public StatClient(@Value("${explore-server.url}") String serverUrl, RestTemplateBuilder builder) {
+    public StatClient(@Value("${STATS.URI}") String serverUrl, RestTemplateBuilder builder) {
         super(builder.uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
                 .requestFactory(HttpComponentsClientHttpRequestFactory::new)
                 .build());
     }
 
-    public ResponseEntity<Object> createStat(HitDto hit) {
-        return post(hit);
+    public void createStat(HitDto hit) {
+        post(hit);
     }
 
     public ResponseEntity<Object> getStat(String start, String end, List<String> uris, Boolean unique) {

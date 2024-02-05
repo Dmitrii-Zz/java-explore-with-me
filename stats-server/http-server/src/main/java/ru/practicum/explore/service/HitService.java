@@ -28,8 +28,7 @@ public class HitService {
     public ResponseEntity<Object> createHit(HitDto hitDto) {
         Hit hit = HitMapper.toHit(hitDto);
         hit.setTimestamp(LocalDateTime.parse(hitDto.getTimestamp(), FORMATTER));
-        storage.save(hit);
-        return new ResponseEntity<>("Информация сохранена", HttpStatus.CREATED);
+        return new ResponseEntity<>(HitMapper.toHitDto(storage.save(hit)), HttpStatus.CREATED);
     }
 
     public ResponseEntity<Object> getHit(String strStart, String strEnd, List<String> uris, Boolean unique) {
