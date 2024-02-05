@@ -37,7 +37,7 @@ public class ExceptionApiHandler {
     }
 
     @ExceptionHandler({UserNotFountException.class, CategoryNotFountException.class,
-            EventNotFountException.class, RequestNotFountException.class})
+            EventNotFountException.class, RequestNotFountException.class, CommentNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiError handleNotFountException(final Exception e) {
         log.debug("Произошла ошибка {}", e.getMessage());
