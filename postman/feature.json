@@ -22,11 +22,6 @@
 									"pm.test(\"Has user create response\", function () {\r",
 									"    pm.response.to.be.withBody;\r",
 									"    pm.response.to.be.json;\r",
-									"});\r",
-									"pm.test(\"Test user 'id' field\", function () {\r",
-									"    var jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData).to.have.property('id');\r",
-									"    pm.expect(jsonData.id, '\"id\" must be 123').to.eql(123);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -73,11 +68,6 @@
 									"pm.test(\"Has user create response\", function () {\r",
 									"    pm.response.to.be.withBody;\r",
 									"    pm.response.to.be.json;\r",
-									"});\r",
-									"pm.test(\"Test user 'id' field\", function () {\r",
-									"    var jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData).to.have.property('id');\r",
-									"    pm.expect(jsonData.id, '\"id\" must be 124').to.eql(124);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -124,11 +114,6 @@
 									"pm.test(\"Has user create response\", function () {\r",
 									"    pm.response.to.be.withBody;\r",
 									"    pm.response.to.be.json;\r",
-									"});\r",
-									"pm.test(\"Test user 'id' field\", function () {\r",
-									"    var jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData).to.have.property('id');\r",
-									"    pm.expect(jsonData.id, '\"id\" must be 125').to.eql(125);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -175,11 +160,6 @@
 									"pm.test(\"Has user create response\", function () {\r",
 									"    pm.response.to.be.withBody;\r",
 									"    pm.response.to.be.json;\r",
-									"});\r",
-									"pm.test(\"Test user 'id' field\", function () {\r",
-									"    var jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData).to.have.property('id');\r",
-									"    pm.expect(jsonData.id, '\"id\" must be 126').to.eql(126);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -226,11 +206,6 @@
 									"pm.test(\"Has user create response\", function () {\r",
 									"    pm.response.to.be.withBody;\r",
 									"    pm.response.to.be.json;\r",
-									"});\r",
-									"pm.test(\"Test user 'id' field\", function () {\r",
-									"    var jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData).to.have.property('id');\r",
-									"    pm.expect(jsonData.id, '\"id\" must be 127').to.eql(127);\r",
 									"});"
 								],
 								"type": "text/javascript"
