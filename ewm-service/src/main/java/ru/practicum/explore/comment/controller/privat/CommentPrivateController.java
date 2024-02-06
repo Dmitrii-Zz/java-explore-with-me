@@ -45,4 +45,12 @@ public class CommentPrivateController {
         log.info("Запрос на удаление коммента id = {} к событию id = {} от юзера id = {}", commentId, eventId, userId);
         commentService.deleteCommentAuthorEventOrComment(commentId, userId, eventId);
     }
+
+    @PatchMapping("/{commentId}/likes")
+    public ResponseEntity<Object> likeComment(@PathVariable @PositiveOrZero long userId,
+                                              @PathVariable @PositiveOrZero long eventId,
+                                              @PathVariable @PositiveOrZero long commentId) {
+        log.info("Запрос на лайк коммента id = {} к событию id = {} от юзера id = {}", commentId, eventId, userId);
+        return commentService.addLikeComment(userId, commentId, eventId);
+    }
 }

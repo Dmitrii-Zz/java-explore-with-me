@@ -22,6 +22,6 @@ public class CommentPublicController {
 
     @GetMapping
     public ResponseEntity<Object> getAllCommentByEventId(@PathVariable @PositiveOrZero long eventId) {
-        return commentService.getAllCommentByEventId();
+        return commentService.getAllCommentByEventId(eventId);
     }
 }

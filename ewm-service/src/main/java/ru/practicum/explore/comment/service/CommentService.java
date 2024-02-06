@@ -7,8 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.practicum.explore.comment.dto.CommentDto;
 import ru.practicum.explore.comment.mapper.CommentMapper;
+import ru.practicum.explore.comment.mapper.LikeMapper;
 import ru.practicum.explore.comment.model.Comment;
+import ru.practicum.explore.comment.model.Like;
 import ru.practicum.explore.comment.repository.CommentRepository;
+import ru.practicum.explore.comment.repository.LikeRepository;
 import ru.practicum.explore.event.model.Event;
 import ru.practicum.explore.event.model.StateEvent;
 import ru.practicum.explore.event.service.EventService;
@@ -18,16 +21,18 @@ import ru.practicum.explore.user.model.User;
 import ru.practicum.explore.user.service.UserService;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CommentService {
-
     private final CommentRepository commentStorage;
     private final UserService userService;
     private final EventService eventService;
+    private final LikeRepository likeStorage;
 
     public ResponseEntity<Object> addComment(long userId, long eventId, CommentDto commentDto) {
         User user = userService.checkExistsUser(userId);
@@ -90,16 +95,34 @@ public class CommentService {
         commentStorage.deleteById(commentId);
     }
 
-    public ResponseEntity<Object> getAllCommentByEventId() {
-        return null;
+    public ResponseEntity<Object> getAllCommentByEventId(long eventId) {
+        eventService.checkExistsEvent(eventId);
+        List<CommentDto> comments = commentStorage.findAllByEventId(eventId).stream()
+                .map(CommentMapper::toCommentDto)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(comments, HttpStatus.OK);
     }
 
     public ResponseEntity<Object> addLikeComment(long userId, long commentId, long eventId) {
-        return null;
-    }
+        eventService.checkExistsEvent(eventId);
+        Comment comment = checkExistsComment(commentId);
+        User user = userService.checkExistsUser(userId);
+        Like like = likeStorage.findByCommentIdAndUserId(commentId, userId);
 
-    public ResponseEntity<Object> deleteLikeComment(long userId, long commentId, long eventId) {
-        return null;
+        if (like != null) {
+            likeStorage.deleteById(like.getId());
+            comment.setLikes(comment.getLikes() - 1);
+            commentStorage.save(comment);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            Like newlike = Like.builder()
+                    .comment(comment)
+                    .user(user)
+                    .build();
+            comment.setLikes(comment.getLikes() + 1);
+            commentStorage.save(comment);
+            return new ResponseEntity<>(LikeMapper.toLikeDto(likeStorage.save(newlike)), HttpStatus.CREATED);
+        }
     }
 
     public Comment checkExistsComment(long commentId) {
